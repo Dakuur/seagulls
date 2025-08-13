@@ -6,7 +6,6 @@ class Dataset:
         self.images = []
         self.labels = []
         self.load_data()
-        self.pair_data()
 
     def load_data(self):
         """
@@ -23,31 +22,23 @@ class Dataset:
             print(f"Error: Labels directory {labels_dir} does not exist.")
             return
 
-        # Load images
-        image_files = [os.path.splitext(f)[0] for f in os.listdir(images_dir) if f.lower().endswith('.jpg')]
-        for img_file in sorted(image_files):
-            #img_path = os.path.join(images_dir, img_file)
-            self.images.append(img_file)
+        images = [os.path.splitext(f)[0] for f in os.listdir(images_dir)]
+        labels = [os.path.splitext(f)[0] for f in os.listdir(labels_dir)]
+        common =  list(set(images) & set(labels))
+        print(f"Found {len(images)} images and {len(labels)} labels. Common files: {len(common)}")
 
-        # Load labels
-        label_files = [os.path.splitext(f)[0] for f in os.listdir(labels_dir) if f.lower().endswith('.txt')]
-        for label_file in sorted(label_files):
-            #label_path = os.path.join(labels_dir, label_file)
-            self.labels.append(label_file)
+        if not common:
+            print("Warning: No common files found between images and labels directories.")
+            return
+
+        for name in sorted(common):
+            img_path = os.path.join(images_dir, name + '.jpg')  # Assuming images are in JPG format
+            label_path = os.path.join(labels_dir, name + '.txt')
+            self.images.append(img_path)
+            self.labels.append(label_path)
 
         if len(self.images) != len(self.labels):
             print(f"Warning: Number of images ({len(self.images)}) does not match number of labels ({len(self.labels)}).")
-
-    def pair_data(self):
-        common =  set(self.images) & set(self.labels)
-        if not common:
-            print("No common files found between images and labels.")
-            return
-        paired_images = [img for img in self.images if img in common]
-        paired_labels = [lbl for lbl in self.labels if lbl in common]
-        print(f"Paired {len(paired_images)} images with labels.")
-        self.images = sorted(paired_images)
-        self.labels = sorted(paired_labels)
 
 if __name__ == "__main__":
     #path = "/home/dakur/Downloads/ringreadingcompetition/datasets/lyngoy"
@@ -58,4 +49,3 @@ if __name__ == "__main__":
     if dataset.images and dataset.labels:
         print(dataset.images[0])
         print(dataset.labels[0])
-    dataset.pair_data()
