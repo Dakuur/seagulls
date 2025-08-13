@@ -1,51 +1,50 @@
 import os
+import re
+from PIL import Image
 
 class Dataset:
     def __init__(self, directory):
         self.directory = directory
         self.images = []
-        self.labels = []
         self.load_data()
 
     def load_data(self):
         """
-        Gets image and label names from specified directory.
+        Gets image names from specified directory.
         :return:
         """
         images_dir = os.path.join(self.directory, 'images')
-        labels_dir = os.path.join(self.directory, 'labels')
 
         if not os.path.exists(images_dir):
             print(f"Error: Images directory {images_dir} does not exist.")
             return
-        if not os.path.exists(labels_dir):
-            print(f"Error: Labels directory {labels_dir} does not exist.")
-            return
 
-        images = [os.path.splitext(f)[0] for f in os.listdir(images_dir)]
-        labels = [os.path.splitext(f)[0] for f in os.listdir(labels_dir)]
-        common =  list(set(images) & set(labels))
-        print(f"Found {len(images)} images and {len(labels)} labels. Common files: {len(common)}")
+        images = [os.path.join(images_dir, img) for img in os.listdir(images_dir)]
+        print(f"Found {len(images)} images")
+        self.images = images
 
-        if not common:
-            print("Warning: No common files found between images and labels directories.")
-            return
+    def __len__(self):
+        return len(self.images)
 
-        for name in sorted(common):
-            img_path = os.path.join(images_dir, name + '.jpg')  # Assuming images are in JPG format
-            label_path = os.path.join(labels_dir, name + '.txt')
-            self.images.append(img_path)
-            self.labels.append(label_path)
+    def __getitem__(self, idx):
+        if idx < 0 or idx >= len(self.images):
+            raise IndexError("Index out of range.")
 
-        if len(self.images) != len(self.labels):
-            print(f"Warning: Number of images ({len(self.images)}) does not match number of labels ({len(self.labels)}).")
+        image = Image.open(os.path.join(self.images[idx]))
+        match = re.search(r'\((.*?)\)', self.images[idx])
+        if not match:
+            raise ValueError(f"No label found in image path: {self.images[idx]}")
+        label = match.group(1)
+
+        return image, label
 
 if __name__ == "__main__":
     #path = "/home/dakur/Downloads/ringreadingcompetition/datasets/lyngoy"
     path = "/home/dakur/Downloads/ringreadingcompetition/datasets/ringmerkingno"
     dataset = Dataset(path)
-    print(f"Loaded {len(dataset.images)} images and {len(dataset.labels)} labels.")
+    print(f"Loaded {len(dataset.images)} images.")
     # Example usage: print the first image and label
-    if dataset.images and dataset.labels:
-        print(dataset.images[0])
-        print(dataset.labels[0])
+    print(dataset.images[0])
+    print(dataset[0])  # This will print the first image
+    for i in range(100):
+        print(dataset[i][1])
