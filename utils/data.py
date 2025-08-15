@@ -5,7 +5,7 @@ from PIL import Image
 from torchvision import transforms
 import matplotlib.pyplot as plt
 import torch
-
+import pickle
 
 def load_crop_yolo_image(img_path):
     # Path del txt correspondiente
@@ -47,7 +47,7 @@ def load_crop_yolo_image(img_path):
     cropped_image = image.crop((x_min, y_min, x_max, y_max))
 
     # Redimensionar a 300x300
-    cropped_image = cropped_image.resize((256, 256))
+    cropped_image = cropped_image.resize((128, 128))
 
     # Transformar (normalizar y tensorizar)
     transform = transforms.Compose([

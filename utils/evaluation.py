@@ -10,8 +10,6 @@ def weighted_f1_score(y_true, y_pred):
     The weighted F1 score is calculated as:
     F1 = (1.25 * Precision * Recall) / (0.25 * Precision + Recall)
     """
-
-
     precision = precision_score(y_true, y_pred, average='weighted', zero_division=0)
     recall = recall_score(y_true, y_pred, average='weighted', zero_division=0)
     f1_score = (1.25 * precision * recall) / (0.25 * precision + recall)
